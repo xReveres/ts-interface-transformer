@@ -1,5 +1,14 @@
 # ts-interface-transformer
 
+#### Functions
+```ts
+function typeInfo<T extends object>(): Array<TypeInfo>;
+function typeInfo<T extends object>(multiLine: true): Array<TypeInfo>;
+function keys<T extends object>(): Array<keyof T>;
+```
+---
+
+#### Example
 ```ts
 interface A {
     xyz: string
@@ -28,12 +37,19 @@ interface Foo {
     k?: string
 }
 
+// Extracted keys
+var k = keys<Foo>();
+
+// Extracted interface information
 var i = typeInfo<Foo>(true);
 ```
 
 Transforms to: 
 
 ```js
+// Extracted keys
+var k = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k"];
+// Extracted interface information
 var i = {
     "name": "Foo",
     "type": "interface",

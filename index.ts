@@ -14,5 +14,5 @@ export interface Property {
 }
 
 export declare function typeInfo<T extends object>(): Array<TypeInfo>;
-export declare function typeInfo<T extends object>(multiLine: true): Array<TypeInfo>
+export declare function typeInfo<T extends object>(multiLine: true): Array<TypeInfo>;
 export declare function keys<T extends object>(): Array<keyof T>;

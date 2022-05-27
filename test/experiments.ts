@@ -1,4 +1,4 @@
-import { typeInfo } from '../index';
+import { typeInfo, keys } from '../index';
 
 interface A {
     xyz: string
@@ -27,4 +27,8 @@ interface Foo {
     k?: string
 }
 
+// Extracted keys
+var k = keys<Foo>();
+
+// Extracted interface information
 var i = typeInfo<Foo>(true);
