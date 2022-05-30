@@ -67,22 +67,17 @@ var visitNode = function (node, program) {
 };
 var getTypeInfo = function (typeNode, typeChecker, multiLine) {
     var type = typeChecker.getTypeFromTypeNode(typeNode);
-    var properties = [];
-    var symbols = typeChecker.getPropertiesOfType(type);
-    symbols.forEach(function (s) {
-        if (!s.valueDeclaration)
-            return;
-        var prop = getPropertyInfo(s.valueDeclaration, typeChecker, multiLine);
-        if (prop)
-            properties.push(prop);
-    });
     var infoObject = [];
     if (type.isClassOrInterface()) {
         if (type.symbol) {
             infoObject.push(typescript_1.factory.createPropertyAssignment(typescript_1.factory.createStringLiteral("name"), typescript_1.factory.createStringLiteral(type.symbol.getName())));
         }
         infoObject.push(typescript_1.factory.createPropertyAssignment(typescript_1.factory.createStringLiteral("type"), getPropertyType(type)));
-        infoObject.push(typescript_1.factory.createPropertyAssignment(typescript_1.factory.createStringLiteral("properties"), typescript_1.factory.createArrayLiteralExpression(properties)));
+        infoObject.push(typescript_1.factory.createPropertyAssignment(typescript_1.factory.createStringLiteral("properties"), typescript_1.factory.createArrayLiteralExpression(typeChecker.getPropertiesOfType(type)
+            .filter(function (s) { return !!s.valueDeclaration; })
+            .map(function (s) {
+            return getPropertyInfo(s.valueDeclaration, typeChecker, multiLine);
+        }))));
     }
     else {
         infoObject.push(typescript_1.factory.createPropertyAssignment(typescript_1.factory.createStringLiteral("type"), getPropertyType(typeNode)));
@@ -91,6 +86,17 @@ var getTypeInfo = function (typeNode, typeChecker, multiLine) {
             infoObject.push(typescript_1.factory.createPropertyAssignment(typescript_1.factory.createStringLiteral("properties"), typescript_1.factory.createArrayLiteralExpression(type_1.members
                 .map(function (m) { return getPropertyInfo(m, typeChecker, multiLine); })
                 .filter(function (m) { return typeof m !== 'undefined'; }))));
+        }
+        if (typeNode.kind == typescript_1.default.SyntaxKind.TypeReference) {
+            var type_2 = typeNode;
+            if (type_2.typeArguments) {
+                infoObject.push(typescript_1.factory.createPropertyAssignment(typescript_1.factory.createStringLiteral("typeArguments"), typescript_1.factory.createArrayLiteralExpression(type_2.typeArguments
+                    .map(function (t) { return getTypeInfo(t, typeChecker, multiLine); }))));
+            }
+        }
+        if (typeNode.kind == typescript_1.default.SyntaxKind.ArrayType) {
+            var type_3 = typeNode;
+            infoObject.push(typescript_1.factory.createPropertyAssignment(typescript_1.factory.createStringLiteral("elementType"), getTypeInfo(type_3.elementType, typeChecker, multiLine)));
         }
     }
     return typescript_1.factory.createObjectLiteralExpression(infoObject, multiLine);

@@ -45,17 +45,8 @@ const visitNode = (node: ts.Node, program: ts.Program): ts.Node => {
     return node;
 };
 
-const getTypeInfo = (typeNode: ts.TypeNode, typeChecker: ts.TypeChecker, multiLine: boolean) => {
+const getTypeInfo = (typeNode: ts.TypeNode, typeChecker: ts.TypeChecker, multiLine: boolean): ts.ObjectLiteralExpression => {
     const type = typeChecker.getTypeFromTypeNode(typeNode);
-    let properties: ts.Expression[] = [];
-    const symbols = typeChecker.getPropertiesOfType(type);
-    symbols.forEach(s => {
-        if (!s.valueDeclaration)
-            return;
-        const prop = getPropertyInfo(s.valueDeclaration, typeChecker, multiLine);
-        if (prop)
-            properties.push(prop);
-    });
     const infoObject = [];
     if (type.isClassOrInterface()) {
         if (type.symbol) {
@@ -70,7 +61,12 @@ const getTypeInfo = (typeNode: ts.TypeNode, typeChecker: ts.TypeChecker, multiLi
         ));
         infoObject.push(factory.createPropertyAssignment(
             factory.createStringLiteral("properties"),
-            factory.createArrayLiteralExpression(properties)
+            factory.createArrayLiteralExpression(
+                typeChecker.getPropertiesOfType(type)
+                    .filter(s => !!s.valueDeclaration)
+                    .map(s => {
+                        return getPropertyInfo(s.valueDeclaration!, typeChecker, multiLine)
+                    }) as ts.Expression[])
         ));
     } else {
         infoObject.push(factory.createPropertyAssignment(
@@ -84,6 +80,23 @@ const getTypeInfo = (typeNode: ts.TypeNode, typeChecker: ts.TypeChecker, multiLi
                 factory.createArrayLiteralExpression(type.members
                     .map(m => getPropertyInfo(m, typeChecker, multiLine))
                     .filter(m => typeof m !== 'undefined') as ts.Expression[])
+            ));
+        }
+        if (typeNode.kind == ts.SyntaxKind.TypeReference) {
+            const type = typeNode as ts.TypeReferenceNode;
+            if (type.typeArguments) {
+                infoObject.push(factory.createPropertyAssignment(
+                    factory.createStringLiteral("typeArguments"),
+                    factory.createArrayLiteralExpression(type.typeArguments
+                        .map(t => getTypeInfo(t, typeChecker, multiLine)))
+                ));
+            }
+        }
+        if (typeNode.kind == ts.SyntaxKind.ArrayType) {
+            const type = typeNode as ts.ArrayTypeNode;
+            infoObject.push(factory.createPropertyAssignment(
+                factory.createStringLiteral("elementType"),
+                getTypeInfo(type.elementType, typeChecker, multiLine)
             ));
         }
     }

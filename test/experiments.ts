@@ -27,7 +27,8 @@ interface Foo {
     k?: string,
     l: A[],
     m: (string | A)[],
-    n: (A | string)[]
+    n: (A | string)[],
+    o: Array<number[]>
 }
 
 // Extracted keys

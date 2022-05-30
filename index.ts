@@ -19,6 +19,8 @@ export interface TypeInfo {
     name?: string;
     type: string | string[];
     properties?: Property[];
+    typeArguments?: TypeInfo[],
+    elementType?: TypeInfo[]
 }
 
 export interface Property {
@@ -26,7 +28,8 @@ export interface Property {
     optional?: true;
     type: string | string[];
     properties?: Property[];
-    typeArguments?: TypeInfo[]
+    typeArguments?: TypeInfo[],
+    elementType?: TypeInfo[]
 }
 
 export declare function typeInfo<T extends object>(): TypeInfo;
