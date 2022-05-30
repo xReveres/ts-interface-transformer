@@ -7,3 +7,4 @@ package-lock.json
 .npmrc
 *.js
 !jest.config.js
+!transformer.js
