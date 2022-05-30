@@ -8,3 +8,4 @@ package-lock.json
 *.js
 !jest.config.js
 !transformer.js
+!index.js
