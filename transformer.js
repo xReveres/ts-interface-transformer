@@ -119,6 +119,10 @@ var getPropertyInfo = function (decl, typeChecker, multiLine) {
                 .map(function (t) { return getTypeInfo(t, typeChecker, multiLine); }))));
         }
     }
+    if (property.type && property.type.kind == typescript_1.default.SyntaxKind.ArrayType) {
+        var type = property.type;
+        objectArray.push(typescript_1.factory.createPropertyAssignment(typescript_1.factory.createStringLiteral("elementType"), getTypeInfo(type.elementType, typeChecker, multiLine)));
+    }
     return typescript_1.factory.createObjectLiteralExpression(objectArray, multiLine);
 };
 var getPropertyType = function (type) {
@@ -127,6 +131,9 @@ var getPropertyType = function (type) {
     }
     if (type.types || type.kind == typescript_1.default.SyntaxKind.UnionType || type.kind == typescript_1.default.SyntaxKind.IntersectionType) {
         return typescript_1.factory.createArrayLiteralExpression(type.types.map(function (token) { return getPropertyType(token); }));
+    }
+    if (type.kind == typescript_1.default.SyntaxKind.ParenthesizedType) {
+        return getPropertyType(type.type);
     }
     var typeName = '';
     switch (type.kind) {

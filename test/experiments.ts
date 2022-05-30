@@ -24,7 +24,10 @@ interface Foo {
     h: boolean,
     i: Date,
     j: Record<string, number>,
-    k?: string
+    k?: string,
+    l: A[],
+    m: (string | A)[],
+    n: (A | string)[]
 }
 
 // Extracted keys

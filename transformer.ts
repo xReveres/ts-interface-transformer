@@ -129,6 +129,13 @@ const getPropertyInfo = (decl: ts.Declaration, typeChecker: ts.TypeChecker, mult
             ));
         }
     }
+    if (property.type && property.type.kind == ts.SyntaxKind.ArrayType) {
+        const type = property.type as ts.ArrayTypeNode;
+        objectArray.push(factory.createPropertyAssignment(
+            factory.createStringLiteral("elementType"),
+            getTypeInfo(type.elementType, typeChecker, multiLine)
+        ));
+    }
     return factory.createObjectLiteralExpression(objectArray, multiLine);
 }
 
@@ -138,6 +145,9 @@ const getPropertyType = (type: any): ts.StringLiteral | ts.ArrayLiteralExpressio
     }
     if (type.types || type.kind == ts.SyntaxKind.UnionType || type.kind == ts.SyntaxKind.IntersectionType) {
         return factory.createArrayLiteralExpression(type.types.map((token: any) => getPropertyType(token)));
+    }
+    if (type.kind == ts.SyntaxKind.ParenthesizedType) {
+        return getPropertyType(type.type);
     }
     let typeName: string = '';
     switch (type.kind) {

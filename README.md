@@ -34,7 +34,10 @@ interface Foo {
     h: boolean,
     i: Date,
     j: Record<string, number>,
-    k?: string
+    k?: string,
+    l: A[],
+    m: (string | A)[],
+    n: (A | string)[]
 }
 
 // Extracted keys
@@ -48,7 +51,7 @@ Transforms to:
 
 ```js
 // Extracted keys
-var k = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k"];
+var k = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n"];
 // Extracted interface information
 var i = {
     "name": "Foo",
@@ -65,7 +68,10 @@ var i = {
                 }]
         }, {
             "name": "b",
-            "type": "array"
+            "type": "array",
+            "elementType": {
+                "type": "number"
+            }
         }, {
             "name": "c",
             "type": "Array",
@@ -74,7 +80,17 @@ var i = {
                 }]
         }, {
             "name": "d",
-            "type": "array"
+            "type": "array",
+            "elementType": {
+                "type": "object",
+                "properties": [{
+                        "name": "x",
+                        "type": "string"
+                    }, {
+                        "name": "y",
+                        "type": "boolean"
+                    }]
+            }
         }, {
             "name": "e",
             "type": "Array",
@@ -130,6 +146,29 @@ var i = {
             "name": "k",
             "type": "string",
             "optional": true
+        }, {
+            "name": "l",
+            "type": "array",
+            "elementType": {
+                "name": "A",
+                "type": "interface",
+                "properties": [{
+                        "name": "xyz",
+                        "type": "string"
+                    }]
+            }
+        }, {
+            "name": "m",
+            "type": "array",
+            "elementType": {
+                "type": ["string", "A"]
+            }
+        }, {
+            "name": "n",
+            "type": "array",
+            "elementType": {
+                "type": ["A", "string"]
+            }
         }]
 };
 ```
