@@ -37,7 +37,8 @@ interface Foo {
     k?: string,
     l: A[],
     m: (string | A)[],
-    n: (A | string)[]
+    n: (A | string)[],
+    o: Array<number[]>
 }
 
 // Extracted keys
@@ -51,7 +52,7 @@ Transforms to:
 
 ```js
 // Extracted keys
-var k = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n"];
+var k = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o"];
 // Extracted interface information
 var i = {
     "name": "Foo",
@@ -169,6 +170,15 @@ var i = {
             "elementType": {
                 "type": ["A", "string"]
             }
+        }, {
+            "name": "o",
+            "type": "Array",
+            "typeArguments": [{
+                    "type": "array",
+                    "elementType": {
+                        "type": "number"
+                    }
+                }]
         }]
 };
 ```
