@@ -23,41 +23,41 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const path = __importStar(require("path"));
-const typescript_1 = __importStar(require("typescript"));
-exports.default = (program) => {
-    return (ctx) => {
-        return (sourceFile) => {
-            const visitor = (node) => {
+var path = __importStar(require("path"));
+var typescript_1 = __importStar(require("typescript"));
+exports.default = (function (program) {
+    return function (ctx) {
+        return function (sourceFile) {
+            var visitor = function (node) {
                 return typescript_1.default.visitEachChild(visitNode(node, program), visitor, ctx);
             };
             return typescript_1.default.visitEachChild(visitNode(sourceFile, program), visitor, ctx);
         };
     };
-};
-const symbolMap = new Map();
-const visitNode = (node, program) => {
+});
+var symbolMap = new Map();
+var visitNode = function (node, program) {
     if (node.kind === typescript_1.default.SyntaxKind.SourceFile) {
-        node['locals'].forEach((symbol, key) => {
+        node['locals'].forEach(function (symbol, key) {
             if (!symbolMap.has(key)) {
                 symbolMap.set(key, symbol);
             }
         });
     }
-    const typeChecker = program.getTypeChecker();
+    var typeChecker = program.getTypeChecker();
     if (isFnCallExpression("keys", node, typeChecker)) {
         if (!node.typeArguments) {
             return typescript_1.factory.createArrayLiteralExpression([]);
         }
-        const type = typeChecker.getTypeFromTypeNode(node.typeArguments[0]);
-        const properties = typeChecker.getPropertiesOfType(type);
-        return typescript_1.factory.createArrayLiteralExpression(properties.map(property => typescript_1.factory.createStringLiteral(property.name)));
+        var type = typeChecker.getTypeFromTypeNode(node.typeArguments[0]);
+        var properties = typeChecker.getPropertiesOfType(type);
+        return typescript_1.factory.createArrayLiteralExpression(properties.map(function (property) { return typescript_1.factory.createStringLiteral(property.name); }));
     }
     else if (isFnCallExpression("typeInfo", node, typeChecker)) {
         if (!node.typeArguments) {
             return typescript_1.factory.createArrayLiteralExpression([]);
         }
-        let multiLine = false;
+        var multiLine = false;
         if (node.arguments.length) {
             multiLine = node.arguments[0].kind == typescript_1.default.SyntaxKind.TrueKeyword;
         }
@@ -65,18 +65,18 @@ const visitNode = (node, program) => {
     }
     return node;
 };
-const getTypeInfo = (typeNode, typeChecker, multiLine) => {
-    const type = typeChecker.getTypeFromTypeNode(typeNode);
-    let properties = [];
-    const symbols = typeChecker.getPropertiesOfType(type);
-    symbols.forEach(s => {
+var getTypeInfo = function (typeNode, typeChecker, multiLine) {
+    var type = typeChecker.getTypeFromTypeNode(typeNode);
+    var properties = [];
+    var symbols = typeChecker.getPropertiesOfType(type);
+    symbols.forEach(function (s) {
         if (!s.valueDeclaration)
             return;
-        const prop = getPropertyInfo(s.valueDeclaration, typeChecker, multiLine);
+        var prop = getPropertyInfo(s.valueDeclaration, typeChecker, multiLine);
         if (prop)
             properties.push(prop);
     });
-    const infoObject = [];
+    var infoObject = [];
     if (type.isClassOrInterface()) {
         if (type.symbol) {
             infoObject.push(typescript_1.factory.createPropertyAssignment(typescript_1.factory.createStringLiteral("name"), typescript_1.factory.createStringLiteral(type.symbol.getName())));
@@ -87,19 +87,19 @@ const getTypeInfo = (typeNode, typeChecker, multiLine) => {
     else {
         infoObject.push(typescript_1.factory.createPropertyAssignment(typescript_1.factory.createStringLiteral("type"), getPropertyType(typeNode)));
         if (typeNode.kind == typescript_1.default.SyntaxKind.TypeLiteral) {
-            const type = typeNode;
-            infoObject.push(typescript_1.factory.createPropertyAssignment(typescript_1.factory.createStringLiteral("properties"), typescript_1.factory.createArrayLiteralExpression(type.members
-                .map(m => getPropertyInfo(m, typeChecker, multiLine))
-                .filter(m => typeof m !== 'undefined'))));
+            var type_1 = typeNode;
+            infoObject.push(typescript_1.factory.createPropertyAssignment(typescript_1.factory.createStringLiteral("properties"), typescript_1.factory.createArrayLiteralExpression(type_1.members
+                .map(function (m) { return getPropertyInfo(m, typeChecker, multiLine); })
+                .filter(function (m) { return typeof m !== 'undefined'; }))));
         }
     }
     return typescript_1.factory.createObjectLiteralExpression(infoObject, multiLine);
 };
-const getPropertyInfo = (decl, typeChecker, multiLine) => {
+var getPropertyInfo = function (decl, typeChecker, multiLine) {
     if (decl.kind != typescript_1.default.SyntaxKind.PropertyDeclaration && decl.kind != typescript_1.default.SyntaxKind.PropertySignature)
         return;
-    const property = decl;
-    const objectArray = [
+    var property = decl;
+    var objectArray = [
         typescript_1.factory.createPropertyAssignment(typescript_1.factory.createStringLiteral("name"), typescript_1.factory.createStringLiteral(property.name.getText())),
         typescript_1.factory.createPropertyAssignment(typescript_1.factory.createStringLiteral("type"), getPropertyType(property.type))
     ];
@@ -107,28 +107,28 @@ const getPropertyInfo = (decl, typeChecker, multiLine) => {
         objectArray.push(typescript_1.factory.createPropertyAssignment(typescript_1.factory.createStringLiteral("optional"), typescript_1.factory.createTrue()));
     }
     if (property.type && property.type.kind == typescript_1.default.SyntaxKind.TypeLiteral) {
-        const type = property.type;
+        var type = property.type;
         objectArray.push(typescript_1.factory.createPropertyAssignment(typescript_1.factory.createStringLiteral("properties"), typescript_1.factory.createArrayLiteralExpression(type.members
-            .map(m => getPropertyInfo(m, typeChecker, multiLine))
-            .filter(m => typeof m !== 'undefined'))));
+            .map(function (m) { return getPropertyInfo(m, typeChecker, multiLine); })
+            .filter(function (m) { return typeof m !== 'undefined'; }))));
     }
     if (property.type && property.type.kind == typescript_1.default.SyntaxKind.TypeReference) {
-        const type = property.type;
+        var type = property.type;
         if (type.typeArguments) {
             objectArray.push(typescript_1.factory.createPropertyAssignment(typescript_1.factory.createStringLiteral("typeArguments"), typescript_1.factory.createArrayLiteralExpression(type.typeArguments
-                .map(t => getTypeInfo(t, typeChecker, multiLine)))));
+                .map(function (t) { return getTypeInfo(t, typeChecker, multiLine); }))));
         }
     }
     return typescript_1.factory.createObjectLiteralExpression(objectArray, multiLine);
 };
-const getPropertyType = (type) => {
+var getPropertyType = function (type) {
     if (typeof type.intrinsicName === 'string') {
         return typescript_1.factory.createStringLiteral(type.intrinsicName);
     }
     if (type.types || type.kind == typescript_1.default.SyntaxKind.UnionType || type.kind == typescript_1.default.SyntaxKind.IntersectionType) {
-        return typescript_1.factory.createArrayLiteralExpression(type.types.map((token) => getPropertyType(token)));
+        return typescript_1.factory.createArrayLiteralExpression(type.types.map(function (token) { return getPropertyType(token); }));
     }
-    let typeName = '';
+    var typeName = '';
     switch (type.kind) {
         case typescript_1.default.SyntaxKind.UndefinedKeyword:
             typeName = 'undefined';
@@ -174,16 +174,16 @@ const getPropertyType = (type) => {
     }
     return typescript_1.factory.createStringLiteral(typeName);
 };
-const indexTs = path.join(__dirname, './index.ts');
-const isFnCallExpression = (name, node, typeChecker) => {
+var indexTs = path.join(__dirname, './index.ts');
+var isFnCallExpression = function (name, node, typeChecker) {
     if (!typescript_1.default.isCallExpression(node)) {
         return false;
     }
-    const signature = typeChecker.getResolvedSignature(node);
+    var signature = typeChecker.getResolvedSignature(node);
     if (typeof signature === 'undefined') {
         return false;
     }
-    const { declaration } = signature;
+    var declaration = signature.declaration;
     return !!declaration
         && !typescript_1.default.isJSDocSignature(declaration)
         && (path.join(declaration.getSourceFile().fileName) === indexTs)

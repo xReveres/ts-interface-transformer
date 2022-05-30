@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "target": "ESNext",
+    "target": "ES5",
     "module": "commonjs",
     "suppressImplicitAnyIndexErrors": true,
     "noEmitOnError": true,
