@@ -1,4 +1,20 @@
 
+export enum TypeName {
+    unknown = 'unknown',
+    undefined = 'undefined',
+    array = 'array',
+    string = 'string',
+    number = 'number',
+    bigint = 'bigint',
+    boolean = 'boolean',
+    Function = 'Function',
+    any = 'any',
+    null = 'null',
+    object = 'object',
+    class = 'class',
+    interface = 'interface'
+}
+
 export interface TypeInfo {
     name?: string;
     type: string | string[];
@@ -13,6 +29,6 @@ export interface Property {
     typeArguments?: TypeInfo[]
 }
 
-export declare function typeInfo<T extends object>(): Array<TypeInfo>;
-export declare function typeInfo<T extends object>(multiLine: true): Array<TypeInfo>;
+export declare function typeInfo<T extends object>(): TypeInfo;
+export declare function typeInfo<T extends object>(multiLine: true): TypeInfo;
 export declare function keys<T extends object>(): Array<keyof T>;
